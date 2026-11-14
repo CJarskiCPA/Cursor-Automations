@@ -1,10 +1,13 @@
-# Vendor overrides — optional fallback
+# Learned vendor / merchant decisions (append-only)
 
-Puzzle/Ramp **categorization rules are not exposed over MCP**.
+The automation **reads this file at the start of every run** and **appends** new
+high-confidence decisions at the end. Do not delete historical rows.
 
-Use this file only for rare human overrides (merchant pattern → Puzzle account).
-Prefer live Puzzle COA (`getChartOfAccounts`) for valid account names/codes.
+Prefer these mappings when classifying. Account names/codes must exist in Puzzle
+`getChartOfAccounts` (or `chart-of-accounts.md` fallback).
 
-| Ramp merchant / pattern | Puzzle account | Notes |
-|-------------------------|----------------|-------|
-| | | Optional overrides only |
+| Date (UTC) | Merchant / vendor | Account code | Account name | Type (card\|bill_pay) | Reason |
+|------------|-------------------|--------------|--------------|------------------------|--------|
+| | | | | | |
+
+<!-- Append new rows below this header table. Keep one decision per row. -->

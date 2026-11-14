@@ -1,37 +1,47 @@
 # Daily Ramp → Puzzle classification automation
 
-Concise setup for one Cursor Automation that compares Ramp account classifications to Puzzle (books of record), drafts Puzzle fixes, and writes coding back to Ramp.
+Keeps Ramp and Puzzle **account classifications** in sync, writes coding back to
+Ramp (card + bill pay), updates Puzzle, and learns vendor decisions into
+`vendor-rules.md`.
 
 ## Architecture
 
 ```text
-Ramp MCP  →  card + bill pay (read classifications)
-Puzzle MCP →  getChartOfAccounts + matching transactions (books of record)
+vendor-rules.md (learned) + getChartOfAccounts
          ↓
-Compare → Puzzle draft/flag
+Ramp (card + bill pay)  ←→  Puzzle (matching txns)
          ↓
-Ramp write-back:
-  card     → ramp_edit_transaction (accounting category)
-  bill_pay → category + vendor on Ramp bill
+Writes:
+  Puzzle     → update classification on matched txn
+  Ramp card  → ramp_edit_transaction (accounting category)
+  Ramp bill  → category + vendor
+  Ramp vendor default → if MCP supports; else learn in vendor-rules.md
+         ↓
+Append decision → vendor-rules.md
 ```
 
-## MCP coverage (what we use)
+## Behaviors
+
+1. **Ramp card + bill pay coding** — Card: `ramp_edit_transaction` accounting category. Bill pay: category + vendor on the bill.
+2. **Vendor default** — When a vendor should inherit that account later, attempt Ramp MCP vendor/payee default-account update. **If MCP has no such tool, skip and record in `vendor-rules.md` only.**
+3. **Puzzle sync** — Update classification on the matching Puzzle transaction (categorize/update). Never silent-post journal entries.
+4. **Learning loop** — Append each high-confidence vendor/type decision to `.cursor/skills/classify-transactions/references/vendor-rules.md`.
+
+## MCP coverage
 
 | Need | Puzzle MCP | Ramp MCP |
 |------|------------|----------|
-| Chart of accounts (GL) | **`getChartOfAccounts`** (primary) | Coding fields via `ramp_get_tracking_categories` / options |
-| Card category write-back | — | **`ramp_edit_transaction`** (`tracking_category_selections`) |
-| Bill pay write-back | — | Bill update tools: **account category + vendor** |
-| Configured categorization **rules** | **Not exposed** (Puzzle UI) | **Not exposed** as a rules list |
-| Transactions to compare | Transactions / ledger tools | `ramp_get_transactions`, bill tools |
-
-Fetch Puzzle COA and Ramp tracking categories **once per run** and reuse.
+| COA | `getChartOfAccounts` | Tracking categories / options for coding |
+| Card category write | — | **`ramp_edit_transaction`** |
+| Bill category + vendor | — | Bill update tools |
+| Vendor **default** GL | — | **Not confirmed in MCP tool list** — learn file fallback |
+| Txn classification update | Categorize / update txn (write access) | — |
+| Rules dump | Not exposed | Not exposed |
 
 ## 1. Connect MCPs
 
-1. Connect **Ramp** and **Puzzle** as cloud MCP servers in Cursor.
-2. Authenticate both (Ramp needs write scope for `ramp_edit_transaction` / bill edits).
-3. On the automation, add **both** via Add Tool or MCP.
+1. Connect Ramp + Puzzle; enable write where needed.
+2. Add **both** to the automation via Add Tool or MCP.
 
 ## 2. Repo layout
 
@@ -39,51 +49,35 @@ Fetch Puzzle COA and Ramp tracking categories **once per run** and reuse.
 .cursor/skills/classify-transactions/
   SKILL.md
   references/
-    chart-of-accounts.md   # fallback only if MCP COA fails
-    vendor-rules.md        # optional human overrides
+    chart-of-accounts.md   # COA fallback
+    vendor-rules.md        # learned decisions (append-only)
 automations/
   ramp-puzzle-classification.instructions.md
 docs/
   ramp-puzzle-classification.md
 ```
 
-## 3. Skill (MCP-first)
-
-| Item | Value |
-|------|--------|
-| Name | `classify-transactions` |
-| COA source | Puzzle **`getChartOfAccounts`** at runtime |
-| Card → Ramp | **`ramp_edit_transaction`** accounting category |
-| Bill pay → Ramp | Account category **and** vendor |
-| Puzzle writes | Draft/flag only — never silent-post |
-| Locked Ramp items | Skip write-back; do not fail the run |
-
-## 4. Create the automation
-
-At [cursor.com/automations](https://cursor.com/automations):
+## 3. Create the automation
 
 | Setting | Value |
 |---------|--------|
-| Trigger | Daily ~8:00 AM (after overnight Ramp→Puzzle sync) |
-| Repository | This repo |
-| Tools | **Ramp MCP** + **Puzzle MCP** (+ Slack optional) |
+| Trigger | Daily ~8:00 AM |
+| Repository | This repo (needed so `vendor-rules.md` can be updated) |
+| Tools | Ramp MCP + Puzzle MCP |
 | Instructions | Paste from `automations/ramp-puzzle-classification.instructions.md` |
 
-## 5. Comparison + write-back logic
+## 4. Comparison + write logic
 
-1. Load Puzzle COA + Ramp tracking categories.
-2. Pull Ramp card spend **and** bill pay.
-3. Locked → `locked_or_skipped` (no Ramp write).
-4. Match to Puzzle; compare **account classification only**.
-5. Differ/missing → Puzzle flag or draft (account from live COA).
-6. **Card:** `ramp_edit_transaction` → accounting category.
-7. **Bill pay:** update Ramp **category + vendor**.
-8. Never post/finalize in Puzzle.
+1. Load `vendor-rules.md` + Puzzle COA + Ramp tracking categories.
+2. Pull Ramp card + bill pay; skip locked for Ramp writes.
+3. Match Puzzle; decide account from learned rules + COA.
+4. Update Puzzle classification; update Ramp (card category / bill category+vendor).
+5. Try vendor default update if MCP allows; else note unsupported.
+6. Append learning row to `vendor-rules.md`.
 
-## 6. Constraints
+## 5. Constraints
 
-- Puzzle = books of record (draft/flag only)
-- Ramp write-back **is** supported for card category via MCP (`ramp_edit_transaction`)
-- Bill pay also writes vendor + category to Ramp
-- Both Ramp and Puzzle MCPs on the **same** automation
-- Puzzle/Ramp **rules catalogs** remain UI-only
+- Classification only (no receipt/memo work)
+- Puzzle: update categories; never silent-post JEs
+- Append-only learning file — never wipe `vendor-rules.md`
+- Both MCPs on one automation

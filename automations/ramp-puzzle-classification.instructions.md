@@ -7,47 +7,48 @@ Follow the classify-transactions skill in this repo
 (.cursor/skills/classify-transactions/).
 
 Goal
-Compare Ramp account classifications to Puzzle (books of record).
-Account classification only — ignore receipts and memos.
-Flag or draft mismatches on Puzzle (never silent-post).
-Also write corrections back to Ramp:
-- Card spend → accounting category via ramp_edit_transaction
-- Bill pay → account category AND vendor on the Ramp bill
+Keep Ramp and Puzzle account classifications in sync.
+Classification only — ignore receipts and memos.
+Update both sides where MCP allows. Never silent-post journal entries.
+Learn: append each high-confidence vendor/type decision to
+references/vendor-rules.md.
 
 Setup you already have
-- Tools: Ramp MCP + Puzzle MCP (same automation)
+- Tools: Ramp MCP + Puzzle MCP (same automation; write enabled as needed)
 - Schedule: daily ~8:00 AM (after overnight Ramp → Puzzle sync)
 - Skill: classify-transactions
 
-Load reference data first (MCP)
-1. Puzzle: list_companies if needed, then getChartOfAccounts once; reuse for the run.
-2. Ramp: ramp_get_tracking_categories /
-   ramp_get_tracking_category_options (needed for card category write-back).
-3. Do NOT expect a Puzzle or Ramp “list categorization rules” tool —
-   those rules are not exposed over MCP. Use each txn’s current classification.
-4. Fallback only if getChartOfAccounts fails:
-   references/chart-of-accounts.md (and optional vendor-rules.md).
-   If still empty, compare/flag only — never invent accounts.
+Load first
+1. Read references/vendor-rules.md (learned rules — prefer these).
+2. Puzzle: list_companies if needed, getChartOfAccounts once; reuse.
+3. Ramp: ramp_get_tracking_categories /
+   ramp_get_tracking_category_options (for card category writes).
+4. Fallback if COA fails: references/chart-of-accounts.md.
+   Never invent accounts.
 
 Run steps
-1. Read Ramp first: card spend AND bill pay. Tag each as card or bill_pay.
-2. For each item, capture the account classification (and vendor for bills).
-3. If Ramp classification is locked / not editable:
-   put it in locked_or_skipped and continue — do not error; skip Ramp write-back.
-4. Find the matching transaction in Puzzle (books of record).
-5. Compare account classification only.
-6. If they match → matched.
-7. If they differ, or Puzzle is missing/wrong →
-   flag for review or draft a correction on Puzzle only
-   (suggested account must come from getChartOfAccounts / fallback file).
-8. Ramp write-back (unless locked):
-   - Card: ramp_edit_transaction with tracking_category_selections
-     for the accounting category.
+1. Read Ramp: card spend AND bill pay. Tag card | bill_pay.
+2. Capture account classification (and vendor for bills).
+3. Locked Ramp coding → locked_or_skipped; skip Ramp write-back.
+4. Match to Puzzle. Compare account classification only.
+5. Decide account (vendor-rules.md → evidence → COA allowlist).
+6. Puzzle: update matching txn classification via Puzzle MCP
+   (categorize/update). Never post/finalize JE; never change amounts/dates.
+7. Ramp write-back (unless locked):
+   - Card: ramp_edit_transaction + tracking_category_selections
+     (accounting category).
    - Bill pay: update account category AND vendor on the Ramp bill.
-9. Never post, finalize, void, or change amounts/dates/payees in Puzzle.
-10. End with a short summary:
-    matched | puzzle_draft_or_flagged | locked_or_skipped | unmatched | errors
-    and ramp_writeback counts (updated / skipped_locked / failed)
+8. Vendor default: if this vendor should default to that account going
+   forward, try Ramp MCP vendor/payee update for default accounting
+   category. If no such tool exists, set vendor_default_update=unsupported
+   and rely on vendor-rules.md + per-txn writes.
+9. Learning loop: append a row to references/vendor-rules.md for each
+   high-confidence decision (date | merchant/vendor | account | type |
+   reason). Do not wipe existing rows. Persist via repo write/PR when possible.
+10. Summary:
+    matched | updated | locked_or_skipped | unmatched | errors
+    ramp_writeback / puzzle_writeback / vendor_default_update /
+    learned_rule_appended counts
 
-If a Puzzle or Ramp write fails, stop further writes of that type and report the error.
+If a Puzzle or Ramp write fails, stop further writes of that type and report.
 ```
