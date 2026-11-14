@@ -1,9 +1,10 @@
-# Vendor / merchant rules
+# Vendor overrides — optional fallback
 
-Map Ramp merchants to Puzzle accounts. Prefer exact matches first.
+Puzzle/Ramp **categorization rules are not exposed over MCP**.
 
-<!-- Add rows like: AWS → 64000 Software -->
+Use this file only for rare human overrides (merchant pattern → Puzzle account).
+Prefer live Puzzle COA (`getChartOfAccounts`) for valid account names/codes.
 
 | Ramp merchant / pattern | Puzzle account | Notes |
 |-------------------------|----------------|-------|
-| | | Fill from your common Ramp vendors |
+| | | Optional overrides only |

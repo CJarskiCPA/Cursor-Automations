@@ -16,6 +16,16 @@ Setup you already have
 - Schedule: daily ~8:00 AM (after overnight Ramp → Puzzle sync)
 - Skill: classify-transactions
 
+Load reference data first (MCP)
+1. Puzzle: list_companies if needed, then getChartOfAccounts once; reuse for the run.
+2. Optional Ramp context: ramp_get_tracking_categories /
+   ramp_get_tracking_category_options and/or ramp_merchant_categories.
+3. Do NOT expect a Puzzle or Ramp “list categorization rules” tool —
+   those rules are not exposed over MCP. Use each txn’s current classification.
+4. Fallback only if getChartOfAccounts fails:
+   references/chart-of-accounts.md (and optional vendor-rules.md).
+   If still empty, compare/flag only — never invent accounts.
+
 Run steps
 1. Read Ramp first: card spend AND bill pay.
 2. For each item, capture the account classification.
@@ -25,7 +35,8 @@ Run steps
 5. Compare account classification only.
 6. If they match → matched.
 7. If they differ, or Puzzle is missing/wrong →
-   flag for review or draft a correction on Puzzle only.
+   flag for review or draft a correction on Puzzle only
+   (suggested account must come from getChartOfAccounts / fallback file).
 8. Never write classifications back to Ramp
    (Puzzle does not push category changes to Ramp).
 9. Never post, finalize, void, or change amounts/dates/payees in Puzzle.
@@ -33,6 +44,4 @@ Run steps
     matched | puzzle_draft_or_flagged | locked_or_skipped | unmatched | errors
 
 If a Puzzle write fails, stop further writes and report the error.
-Use references/chart-of-accounts.md and references/vendor-rules.md
-when suggesting a Puzzle correction.
 ```

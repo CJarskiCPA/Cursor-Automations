@@ -1,10 +1,10 @@
-# Chart of accounts (Puzzle)
+# Chart of accounts — fallback only
 
-List the Puzzle account names/codes this automation may use when suggesting
-corrections. Keep this file as the allowlist — do not invent accounts.
+**Prefer live data:** Puzzle MCP `getChartOfAccounts` (fetch once per automation run).
 
-<!-- Add rows like: 62100 · Office Supplies -->
+Use this file **only** if that MCP call fails. Keep it short or empty rather than
+stale. Do not invent accounts.
 
 | Code | Account name | Notes |
 |------|--------------|-------|
-| | | Fill with your live Puzzle COA |
+| | | Optional fallback rows |
