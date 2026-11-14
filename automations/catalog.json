@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Ramp → Puzzle classification",
+    "description": "Daily Ramp-first sync of card spend and bill pay account classifications with matching Puzzle transactions. Classification only; updates Puzzle and Ramp where MCP allows; learns vendor decisions into vendor-rules.md.",
+    "schedule": "Daily ~8:00 AM",
+    "status": "Draft",
+    "instructions": "automations/ramp-puzzle-classification.instructions.md",
+    "docs": "docs/ramp-puzzle-classification.md",
+    "skill": ".cursor/skills/classify-transactions/SKILL.md"
+  },
+  {
+    "name": "GitHub → Notion sync",
+    "description": "On every push to main, refresh the Cursor Automations Notion catalog and automation detail pages from this repo. One-way: GitHub to Notion only.",
+    "schedule": "On push to main",
+    "status": "Draft",
+    "instructions": "automations/github-notion-sync.instructions.md",
+    "docs": "docs/github-notion-sync.md"
+  }
+]
