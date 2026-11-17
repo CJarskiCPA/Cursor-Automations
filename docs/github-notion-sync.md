@@ -1,51 +1,40 @@
-# GitHub → Notion sync automation
+# Consolidated GitHub → Notion sync
 
-Keeps the **Cursor Automations** Notion catalog in sync with this GitHub repo.
-One-way only: **GitHub → Notion**. Edits in Notion are overwritten on the next sync.
+One Cursor Automation refreshes every GitHub-backed Notion catalog. One-way only: **GitHub → Notion**.
 
-Modeled on **Sync Coding Agent Skills Library to Notion** for
-`CJarskiCPA/coding-agent-skills-library`.
+This replaces the old separate automations:
 
-## How the skills-library sync works (pattern)
+- Sync Cursor Automations to Notion
+- Sync Coding Agent Skills Library to Notion
 
-| Piece | Behavior |
-|-------|----------|
-| Trigger | GitHub **push to `main`** (not a schedule) |
-| Tools | Notion MCP only |
-| Direction | GitHub is source of truth; never edit/commit/PR the repo |
-| Updates | Upsert Notion DB rows + replace detail page content when version changes |
-| Removals | Mark **Retired** — never delete rows |
+## Triggers
 
-## What this automation syncs
+Push to `main` on any of:
 
-| Notion target | URL |
-|---------------|-----|
-| Parent catalog page | https://app.notion.com/p/4183fcffe35181eb85b6ee39f4855c55 |
-| Automations database | https://app.notion.com/p/4183fcffe3518168956de474daadf35e |
-| Ramp → Puzzle detail (example row) | https://app.notion.com/p/4183fcffe3518130bb01d4558d5a74c2 |
+| Repo | Notion destination |
+|------|--------------------|
+| `CJarskiCPA/coding-agent-skills-library` | Coding Agent Skills Library database |
+| `CJarskiCPA/Cursor-Automations` | Cursor Automations parent page + library database |
+| `CJarskiCPA/ai-employee-toolkit` | Shared skills database (inline on AI Employee Toolkit; filter by Department) |
 
-Source of truth for rows: [`automations/catalog.json`](../automations/catalog.json).
-Each entry points at instructions + docs files in this repo.
+## Shared skills database (ai-employee-toolkit)
 
-## Create the automation
+Lives **inline** on the AI Employee Toolkit page (Notion title still **Marketing**). Properties include **Department**: Operations, Finance, Sales, People, HR, Marketing. Do not create separate department databases.
+
+## Create / replace the automation
 
 | Setting | Value |
 |---------|--------|
-| Name | Sync Cursor Automations to Notion |
-| Trigger | GitHub push → repo `CJarskiCPA/Cursor-Automations`, branch `main` |
+| Name | Sync GitHub catalogs to Notion |
+| Trigger | GitHub push → the three repos above, branch `main` |
 | Tools | Notion MCP |
 | Instructions | Paste from [`automations/github-notion-sync.instructions.md`](../automations/github-notion-sync.instructions.md) |
-| Repo write / open PR | Off (one-way sync) |
+| Repo write / open PR | Off |
 
-## After save
-
-1. Confirm the trigger repo is `CJarskiCPA/Cursor-Automations` / `main`.
-2. Confirm Notion MCP is connected for the automation.
-3. Push a small change to `main` (or re-run) and check Automations → Runs.
-4. Verify the catalog page and automation detail pages refreshed.
+After saving, delete or disable the two old sync automations so only this one remains.
 
 ## Edit workflow
 
-1. Change files in this GitHub repo (`catalog.json`, docs, instructions).
+1. Change files in the relevant GitHub repo (and its `catalog.json` when needed).
 2. Push to `main`.
-3. The automation updates Notion. Do not treat Notion as the master copy.
+3. This automation updates only that repo’s Notion targets.
