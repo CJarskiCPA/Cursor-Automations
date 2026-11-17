@@ -25,7 +25,7 @@ Lives **inline** on the AI Employee Toolkit page (Notion title still **Marketing
 
 | Setting | Value |
 |---------|--------|
-| Name | Sync GitHub catalogs to Notion |
+| Name | Sync GitHub repos to Notion |
 | Trigger | GitHub push → the three repos above, branch `main` |
 | Tools | Notion MCP |
 | Instructions | Paste from [`automations/github-notion-sync.instructions.md`](../automations/github-notion-sync.instructions.md) |

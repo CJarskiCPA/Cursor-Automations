@@ -9,7 +9,7 @@
     "skill": ".cursor/skills/classify-transactions/SKILL.md"
   },
   {
-    "name": "Sync GitHub catalogs to Notion",
+    "name": "Sync GitHub repos to Notion",
     "description": "On push to main in coding-agent-skills-library, Cursor-Automations, or ai-employee-toolkit, refresh the matching Notion catalog. Replaces the old separate sync automations. One-way: GitHub to Notion only.",
     "schedule": "On push to main (three repos)",
     "status": "Draft",

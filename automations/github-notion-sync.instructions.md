@@ -4,7 +4,7 @@
 
 | Setting | Value |
 |---------|--------|
-| Name | Sync GitHub catalogs to Notion |
+| Name | Sync GitHub repos to Notion |
 | Triggers | Push to `main` on each of: `CJarskiCPA/coding-agent-skills-library`, `CJarskiCPA/Cursor-Automations`, `CJarskiCPA/ai-employee-toolkit` |
 | Tools | Notion MCP |
 | Repo write / open PR | Off |
