@@ -13,7 +13,7 @@ Push to `main` on any of:
 
 | Repo | Notion destination |
 |------|--------------------|
-| `CJarskiCPA/coding-agent-skills-library` | Coding Agent Skills Library database |
+| `CJarskiCPA/coding-agent-skills-library` | Coding Agent Skills Library database (skills in `skills/`, plus guides in `docs/`) |
 | `CJarskiCPA/Cursor-Automations` | Cursor Automations parent page + library database |
 | `CJarskiCPA/ai-employee-toolkit` | Shared skills database (inline on AI Employee Toolkit; filter by Department) |
 

@@ -32,15 +32,29 @@ data source collection://2247f347-6478-4f0c-a811-781be7eea82d
    - Version: `git log -1 --format=%h -- skills/<folder>`
    - Last updated: `git log -1 --format=%cs -- skills/<folder>` (date only)
    - GitHub source: https://github.com/CJarskiCPA/coding-agent-skills-library/tree/main/skills/<folder>
-2. Read every row of the Coding Agent Skills Library database.
-3. Match rows by the Skill column. Create a row for any skill that has none. Update fields that differ. Replace page content (layout below) only when Version changed, the row is new, or the page has no SKILL.md section yet.
-4. Page content layout:
+   - Kind: skill
+2. For every markdown file directly in `docs/`, collect a guide:
+   - Skill: the level-1 heading (the text after `# `). If there is none, use the filename without `.md`.
+   - Description: the first paragraph under that heading, trimmed to one or two sentences.
+   - Category: Guide
+   - Status: Active
+   - Version: `git log -1 --format=%h -- "docs/<file>"`
+   - Last updated: `git log -1 --format=%cs -- "docs/<file>"` (date only)
+   - GitHub source: https://github.com/CJarskiCPA/coding-agent-skills-library/blob/main/docs/<file> (URL-encode spaces)
+   - Kind: guide
+   - Body: the file with the level-1 heading removed, so the Notion title is not repeated
+3. Read every row of the Coding Agent Skills Library database.
+4. Match rows by the Skill column. Create a row for any skill or guide that has none. Update fields that differ. Replace page content only when Version changed, the row is new, or the page has no "Synced from GitHub" callout yet.
+5. Skill page content layout:
    - Gray callout with 🔄 icon: "Synced from GitHub: [skills/<folder>/SKILL.md](https://github.com/CJarskiCPA/coding-agent-skills-library/blob/main/skills/<folder>/SKILL.md). Edit it in GitHub; changes made here are overwritten on the next sync."
    - Level-2 heading whose text is `SKILL.md` as inline code
    - Complete SKILL.md in a markdown code block; fence one backtick longer than the longest run inside the file
-5. If a row's skill no longer exists in `skills/`, set Status to "Retired". Never delete or archive rows.
-6. If a Category value is not an existing option, add it.
-7. Summarize created / updated / retired / unchanged.
+6. Guide page content layout:
+   - Gray callout with 🔄 icon linking to the docs file on GitHub, with the same "edit it in GitHub" sentence
+   - The guide body as normal Notion content (headings, numbered steps, links). Do not wrap the guide in a code block.
+7. Retire missing items only. A skill row (GitHub source contains `/skills/`, or Category is not Guide) whose folder is gone from `skills/` gets Status "Retired". A guide row (Category is Guide, or GitHub source contains `/docs/`) whose file is gone from `docs/` gets Status "Retired". Never retire a guide just because it has no skill folder. Never delete or archive rows.
+8. If a Category value is not an existing option, add it. Guide must stay an option.
+9. Summarize created / updated / retired / unchanged, and say which were skills and which were guides.
 
 ============================================================
 B) Repo: CJarskiCPA/Cursor-Automations
